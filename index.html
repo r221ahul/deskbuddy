@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08090b">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Desk Buddy</title>
+<link rel="manifest" href="/manifest.json">
+<!--BUDDY_TOKEN-->
+<style>
+:root{--c:#f3efe6;--g:#f3efe655;--bg:#08090b;--dim:#6d7178}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--c);font-family:system-ui,sans-serif;overflow:hidden;transition:opacity 1s}
+#app{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top) 4vmin env(safe-area-inset-bottom)}
+#top{text-align:center;padding-top:3vmin}
+#time{font-size:14vmin;font-weight:200;line-height:1}
+#meta{font-size:3.5vmin;color:var(--dim);margin-top:1vmin;min-height:4.5vmin}
+#face{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5vmin;position:relative;touch-action:manipulation}
+#eyes{display:flex;gap:12vmin;transition:transform .35s ease}
+.eye{width:17vmin;height:23vmin;border-radius:50%;background:var(--c);box-shadow:0 0 5vmin var(--g);transition:height .2s,border-radius .2s,transform .15s,opacity .3s}
+.blink .eye{transform:scaleY(.08)}
+.wink .eye:first-child{transform:scaleY(.08)}
+.happy .eye{height:11vmin;border-radius:50% 50% 0 0}
+.sleepy .eye{height:2.5vmin;opacity:.45}
+.calm .eye{height:10vmin}
+.annoyed .eye{height:7vmin;border-radius:18%}
+.yawn .eye{height:4vmin}
+.dizzy .eye{height:17vmin}.dizzy #eyes{animation:wob .35s infinite alternate}
+@keyframes wob{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+.listen .eye{transform:scale(1.07)}
+#mouth{width:9vmin;height:2.4vmin;background:var(--c);border-radius:99px;transition:all .2s;box-shadow:0 0 3vmin var(--g)}
+.happy #mouth{width:12vmin;height:5vmin;border-radius:0 0 99px 99px}
+.annoyed #mouth{width:8vmin;height:1.1vmin}
+.sleepy #mouth{width:3vmin;height:3vmin;border-radius:50%;opacity:.45}
+.yawn #mouth{width:8vmin;height:11vmin;border-radius:50%}
+.talk #mouth{animation:talk .22s infinite alternate}
+@keyframes talk{from{height:2.4vmin}to{height:8vmin;border-radius:50%}}
+#dots{display:none;gap:3vmin}
+#dots i{width:3.2vmin;height:3.2vmin;border-radius:50%;background:var(--c);animation:pl 1s infinite ease-in-out}
+#dots i:nth-child(2){animation-delay:.15s}#dots i:nth-child(3){animation-delay:.3s}
+@keyframes pl{0%,100%{transform:scale(.6);opacity:.5}50%{transform:scale(1.3);opacity:1}}
+.listen #dots,.think #dots{display:flex}.listen #mouth,.think #mouth{display:none}
+#bubble{min-height:10vmin;max-width:92vw;text-align:center;font-size:4vmin;color:#d8d6d0;line-height:1.35}
+.heart{position:absolute;font-size:8vmin;pointer-events:none;animation:up 1.4s ease-out forwards}
+@keyframes up{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-22vmin)}}
+#chips{display:flex;gap:2.4vmin;flex-wrap:wrap;justify-content:center;padding-bottom:2vmin}
+.chip{background:#14161a;color:var(--c);border:1px solid #2a2d33;border-radius:99px;padding:2.2vmin 4vmin;font-size:3.6vmin;width:auto;height:auto}
+#bar{display:flex;gap:6vmin;align-items:center;padding:1vmin 0 4vmin}
+button{background:#14161a;color:var(--c);border:1px solid #2a2d33;border-radius:50%;width:17vmin;height:17vmin;font-size:6.5vmin}
+button.sm{width:11vmin;height:11vmin;font-size:4.6vmin}
+button.on{background:var(--c);color:#08090b}
+.ov{position:fixed;inset:0;background:#08090bf5;display:none;flex-direction:column;gap:2.2vmin;padding:6vmin;overflow:auto;user-select:text}
+.ov label{font-size:3.3vmin;color:var(--dim)}
+.ov input{width:100%;padding:2.4vmin;font-size:4vmin;background:#14161a;color:#fff;border:1px solid #2a2d33;border-radius:2vmin;user-select:text}
+.ov h2{margin:2vmin 0 0;font-size:4.4vmin;font-weight:600}
+.ov p,.ov li{font-size:3.6vmin;line-height:1.45;color:#cfcdc7;margin:.6vmin 0}
+.ov ul{padding-left:5vmin;margin:0}
+#sw{display:flex;gap:3vmin}.sw{width:10vmin;height:10vmin;border:2px solid #2a2d33}
+#typebar{position:fixed;left:0;right:0;bottom:0;display:none;gap:2vmin;padding:3vmin;background:#08090b;border-top:1px solid #2a2d33}
+#typebar input{flex:1;padding:2.6vmin;font-size:4vmin;background:#14161a;color:#fff;border:1px solid #2a2d33;border-radius:99px;user-select:text}
+#meta div{margin-top:.6vmin}
+@media (orientation:landscape){
+ #app{display:grid;grid-template-columns:34% 1fr;grid-template-rows:1fr auto auto;grid-template-areas:"top face" "chips face" "bar face";column-gap:3vmin;padding-left:max(4vmin,env(safe-area-inset-left));padding-right:max(4vmin,env(safe-area-inset-right))}
+ #top{grid-area:top;text-align:left;align-self:center;padding:0}
+ #time{font-size:19vmin}
+ #meta div{font-size:5vmin;margin-top:1.4vmin}
+ #meta div:first-child{color:#cfcdc7}
+ #face{grid-area:face;gap:4vmin}
+ #chips{grid-area:chips;justify-content:flex-start;padding-bottom:1vmin}
+ #bar{grid-area:bar;justify-content:flex-start;padding-bottom:3vmin}
+ .eye{width:24vmin;height:34vmin}
+ #eyes{gap:14vmin}
+ #bubble{font-size:5vmin}
+ .chip{font-size:4.4vmin;padding:2vmin 3.6vmin}
+ button{width:19vmin;height:19vmin;font-size:8vmin}
+ button.sm{width:13vmin;height:13vmin;font-size:5.6vmin}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top"><div id="time">--:--</div><div id="meta">&nbsp;</div></div>
+  <div id="face"><div id="eyes"><div class="eye"></div><div class="eye"></div></div><div id="mouth"></div><div id="dots"><i></i><i></i><i></i></div><div id="bubble"></div></div>
+  <div id="chips">
+    <button class="chip" id="cq">Quiz me</button><button class="chip" id="cn">News</button><button class="chip" id="cf">Focus 25</button><button class="chip" id="ct">Type</button>
+  </div>
+  <div id="bar"><button class="sm" id="help">?</button><button id="mic">🎤</button><button class="sm" id="gear">⚙</button></div>
+</div>
+<div id="typebar"><input id="ti" placeholder="Ask Buddy anything"><button class="sm" id="ts">➤</button></div>
+
+<div class="ov" id="set">
+  <h2>Settings</h2>
+  <label>Gemini API key (free at aistudio.google.com, stays on this phone only)</label><input id="k" type="password" autocomplete="off">
+  <label>Your name</label><input id="n">
+  <label>Latitude (for temperature)</label><input id="la" inputmode="decimal">
+  <label>Longitude</label><input id="lo" inputmode="decimal">
+  <label>Colour</label><div id="sw"></div>
+  <button class="chip" id="save" style="margin-top:3vmin">Save</button>
+</div>
+
+<div class="ov" id="hp">
+  <h2>How to use Buddy</h2>
+  <p>Touch</p>
+  <ul><li>Tap: happy face and a heart.</li><li>Double tap: a wink.</li><li>Five fast taps: Buddy gets annoyed.</li><li>Hold for a second: sleep. Tap to wake.</li><li>Shake the phone: Buddy gets dizzy.</li></ul>
+  <p>Voice</p>
+  <ul><li>Tap the mic, speak at once, wait for the dots to turn into the mouth.</li><li>Ask follow-ups, Buddy remembers the last few messages.</li><li>No mic? Use Type.</li></ul>
+  <p>Buttons</p>
+  <ul><li>Quiz me: one NABARD-style MCQ on a random topic. Say your answer aloud.</li><li>News: three headlines on RBI, agriculture credit and the economy.</li><li>Focus 25: a 25 minute study timer. Buddy stays calm, then chimes. Tap again to stop.</li></ul>
+  <p>Ideas to try</p>
+  <ul><li>"Explain PMFBY in 30 words."</li><li>"Difference between repo and reverse repo."</li><li>"What did RBI announce today?"</li><li>"Quiz me on rural development."</li><li>"Give me 3 ESI facts about climate finance."</li><li>"Plan my next two hours of study."</li></ul>
+  <p>Setup: open from an https link, allow the microphone, add the Gemini key in settings, then use the browser menu and Add to Home screen. The screen stays on while the app is open. After 11 pm it dims on its own.</p>
+  <button class="chip" id="hx" style="margin-top:3vmin">Close</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id),face=$('face');
+const THEMES={white:'#f3efe6',amber:'#ffb454',mint:'#7cf2c0',pink:'#ff9ec4',sky:'#8ec5ff'};
+const S=Object.assign({k:'',n:'Rahul',la:'26.14',lo:'91.74',t:'white'},JSON.parse(localStorage.getItem('buddy')||'{}'));
+const save=()=>{try{localStorage.setItem('buddy',JSON.stringify(S))}catch(e){}};
+function theme(){const c=THEMES[S.t]||THEMES.white,r=document.documentElement.style;r.setProperty('--c',c);r.setProperty('--g',c+'55')}theme();
+let mood='',last=Date.now(),taps=[],weather='',busy=false,F={on:false,end:0};
+const FK=()=>{try{const o=JSON.parse(localStorage.getItem('buddyF')||'{}');return o.d===new Date().toDateString()?o.n:0}catch(e){return 0}};
+const incF=()=>{try{localStorage.setItem('buddyF',JSON.stringify({d:new Date().toDateString(),n:FK()+1}))}catch(e){}};
+const idleMood=()=>mood===''||mood==='calm';
+function setMood(m){if(m===''&&F.on)m='calm';mood=m;face.className=m}
+const rest=()=>setMood('');
+const say=t=>$('bubble').textContent=t;
+
+// clock, weather, focus
+const codes={0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',61:'Rain',63:'Rain',65:'Heavy rain',80:'Showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};
+function tick(){
+ const d=new Date(),h=d.getHours();
+ $('time').textContent=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
+ const P=[d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})];
+ if(weather)P.push(weather);
+ if(F.on){const s=Math.max(0,Math.round((F.end-Date.now())/1000));P.push('Focus '+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'));if(s===0)endFocus()}
+ else if(FK())P.push(FK()+' focus today');
+ $('meta').innerHTML=P.map(x=>'<div>'+x+'</div>').join('');
+ document.body.style.opacity=(h>=23||h<6)?.45:1;
+}
+async function getWeather(){try{const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${S.la}&longitude=${S.lo}&current=temperature_2m,weather_code`);const j=await r.json();weather=Math.round(j.current.temperature_2m)+'°C '+(codes[j.current.weather_code]||'');tick()}catch(e){}}
+setInterval(tick,1000);tick();getWeather();setInterval(getWeather,900000);
+
+function beep(){try{const a=new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.2,a.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t+.3);o.start(a.currentTime+t);o.stop(a.currentTime+t+.3)})}catch(e){}}
+function endFocus(){F.on=false;incF();$('cf').textContent='Focus 25';$('cf').classList.remove('on');beep();setMood('happy');speak('Focus session done. Take a five minute break.');tick()}
+$('cf').onclick=()=>{last=Date.now();if(F.on){F.on=false;$('cf').textContent='Focus 25';$('cf').classList.remove('on');rest();say('Focus stopped.');return}
+ F={on:true,end:Date.now()+25*60000};$('cf').textContent='Stop focus';$('cf').classList.add('on');rest();say('Focus started. I will stay quiet.');setTimeout(()=>say(''),2500)};
+
+// life: blink, look, idle acts, sleep
+function blink(){if(idleMood()){face.classList.add('blink');setTimeout(()=>face.classList.remove('blink'),150)}setTimeout(blink,2000+Math.random()*4000)}
+function look(){if(idleMood())$('eyes').style.transform=`translate(${(Math.random()-.5)*8}vmin,${(Math.random()-.5)*4}vmin)`;setTimeout(look,1500+Math.random()*3000)}
+function act(){if(mood===''&&!F.on){const a=['yawn','wink','glance'][Math.floor(Math.random()*3)];
+  if(a==='glance'){$('eyes').style.transform='translate(0,-6vmin)';setTimeout(()=>$('eyes').style.transform='',1200)}
+  else{setMood(a);setTimeout(()=>{if(mood===a)rest()},1400)}}
+ setTimeout(act,20000+Math.random()*25000)}
+blink();look();setTimeout(act,15000);
+setInterval(()=>{if(Date.now()-last>60000&&mood===''&&!F.on)setMood('sleepy')},5000);
+
+// touch
+function heart(x,y){const h=document.createElement('div');h.className='heart';h.textContent='💗';h.style.left=(x-20)+'px';h.style.top=(y-20)+'px';face.appendChild(h);setTimeout(()=>h.remove(),1400)}
+let lp=null,lpDone=false;
+face.addEventListener('pointerdown',e=>{
+ lpDone=false;last=Date.now();
+ lp=setTimeout(()=>{lpDone=true;if(mood==='sleepy'){rest()}else{setMood('sleepy')}},800);
+ const now=last;taps=taps.filter(t=>now-t<1500);taps.push(now);
+ if(mood==='sleepy'){clearTimeout(lp);rest();say('Oh, hi.');setTimeout(()=>say(''),1500);return}
+ if(taps.length>=5){clearTimeout(lp);setMood('annoyed');say('Okay, okay. Stop poking.');setTimeout(()=>{rest();say('')},2200);return}
+ const n=taps.length;
+ if(n>=2&&taps[n-1]-taps[n-2]<300){setMood('wink');setTimeout(()=>{if(mood==='wink')rest()},700);return}
+ const r=face.getBoundingClientRect();heart(e.clientX-r.left,e.clientY-r.top);
+ setMood('happy');setTimeout(()=>{if(mood==='happy')rest()},900)});
+['pointerup','pointercancel','pointerleave'].forEach(v=>face.addEventListener(v,()=>clearTimeout(lp)));
+let lm=0;window.addEventListener('devicemotion',e=>{const a=e.accelerationIncludingGravity;if(!a)return;const m=Math.abs(a.x)+Math.abs(a.y)+Math.abs(a.z);
+ if(Math.abs(m-lm)>28&&idleMood()&&mood!=='dizzy'){setMood('dizzy');say('Whoa!');setTimeout(()=>{rest();say('')},2000)}lm=m});
+
+// voice + Gemini
+const synth=window.speechSynthesis;
+function speak(t){say(t);if(!synth)return;synth.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-IN';
+ u.onstart=()=>setMood('talk');u.onend=u.onerror=()=>{rest();setTimeout(()=>say(''),5000)};synth.speak(u)}
+const hist=[];
+async function ask(q){
+ if(busy)return;last=Date.now();
+ if(!S.k){speak('Open settings and add your Gemini key first.');return}
+ busy=true;setMood('think');say('');hist.push({role:'user',parts:[{text:q}]});
+ try{
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${S.k}`,{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({systemInstruction:{parts:[{text:`You are Buddy, a small desk companion for ${S.n}, who is preparing for the NABARD Grade A exam. Reply in plain spoken sentences with no markdown or symbols. Keep answers under 40 words, except quiz questions, which can run to 60. Use search for current facts.`}]},contents:hist.slice(-10),tools:[{google_search:{}}]})});
+  const j=await r.json();
+  if(j.error){hist.pop();busy=false;rest();speak(j.error.code===400||j.error.code===403?'Gemini rejected the key. Check it in settings.':'Gemini error: '+j.error.message.slice(0,80));return}
+  const t=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('').replace(/[*#_`]/g,'').trim()||'I got nothing back.';
+  hist.push({role:'model',parts:[{text:t}]});busy=false;speak(t);
+ }catch(e){busy=false;hist.pop();rest();speak('Network trouble. Check the wifi.')}
+}
+const TOPICS=['agriculture and allied activities','rural development schemes','RBI monetary policy','banking regulation','Indian economy','NABARD functions','financial inclusion','climate and environment','social issues in India','government agricultural schemes'];
+$('cq').onclick=()=>ask(`Ask me one NABARD Grade A style multiple choice question on ${TOPICS[Math.floor(Math.random()*TOPICS.length)]}. Give four options A to D. Do not reveal the answer until I reply.`);
+$('cn').onclick=()=>ask('Give me three headlines from today relevant to RBI, NABARD, agricultural credit or the Indian economy, one short line each.');
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null;
+const MICERR={'not-allowed':'Mic is blocked. Allow the microphone for this site in Chrome, and open Buddy from an https link, not a saved file.','service-not-allowed':'Mic is blocked. Allow the microphone for this site in Chrome, and open Buddy from an https link, not a saved file.','no-speech':'I heard nothing. Tap the mic and start speaking right away.','audio-capture':'No microphone found.','network':'Speech needs an internet connection.'};
+$('mic').onclick=async()=>{
+ last=Date.now();
+ if(rec){rec.stop();return}
+ if(!SR){speak('This browser has no speech input. Use Chrome, or tap Type.');return}
+ if(!window.isSecureContext){say('Mic needs https. Open Buddy from an https link, or use Type.');return}
+ try{const s=await navigator.mediaDevices.getUserMedia({audio:true});s.getTracks().forEach(t=>t.stop())}catch(e){say(MICERR['not-allowed']);return}
+ rec=new SR();rec.lang='en-IN';rec.interimResults=false;let got=false;
+ rec.onstart=()=>{setMood('listen');$('mic').classList.add('on');say('')};
+ rec.onresult=e=>{got=true;ask(e.results[0][0].transcript)};
+ rec.onerror=e=>{if(e.error!=='aborted'){rest();say(MICERR[e.error]||'Mic error: '+e.error)}};
+ rec.onend=()=>{$('mic').classList.remove('on');if(mood==='listen')rest();rec=null};
+ try{rec.start()}catch(e){rec=null;say('Mic would not start. Try again.')}};
+
+// type bar
+$('ct').onclick=()=>{$('typebar').style.display='flex';$('ti').focus()};
+const send=()=>{const v=$('ti').value.trim();if(!v)return;$('ti').value='';$('typebar').style.display='none';ask(v)};
+$('ts').onclick=send;$('ti').addEventListener('keydown',e=>{if(e.key==='Enter')send()});
+face.addEventListener('pointerdown',()=>{$('typebar').style.display='none'});
+
+// settings, help
+const sw=$('sw');Object.entries(THEMES).forEach(([k,c])=>{const b=document.createElement('button');b.className='sw';b.style.background=c;b.onclick=()=>{S.t=k;theme()};sw.appendChild(b)});
+$('gear').onclick=()=>{$('k').value=S.k;$('n').value=S.n;$('la').value=S.la;$('lo').value=S.lo;$('set').style.display='flex'};
+$('save').onclick=()=>{S.k=$('k').value.trim();S.n=$('n').value.trim()||'Rahul';S.la=$('la').value;S.lo=$('lo').value;save();$('set').style.display='none';getWeather()};
+$('help').onclick=()=>$('hp').style.display='flex';$('hx').onclick=()=>$('hp').style.display='none';
+
+// keep awake, fullscreen, greeting
+async function wake(){try{await navigator.wakeLock.request('screen')}catch(e){}}
+wake();document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake()});
+document.addEventListener('click',()=>{if(document.documentElement.requestFullscreen&&!document.fullscreenElement)document.documentElement.requestFullscreen().then(()=>{try{screen.orientation.lock('landscape').catch(()=>{})}catch(e){}}).catch(()=>{})},{once:true});
+(function(){const h=new Date().getHours();say((h<12?'Good morning, ':h<17?'Good afternoon, ':h<22?'Good evening, ':'Still up, ')+S.n+'.');setTimeout(()=>say(''),4000)})();
+</script>
+<script>
+(function(){
+const T=window.BUDDY_TOKEN;
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('/sw.js').catch(()=>{});
+const DOWN='Laptop link is down. Plug the phone into the laptop and check that the bridge is running.';
+async function act(a,arg,target){const r=await fetch('/api/act',{method:'POST',headers:{'Content-Type':'application/json','X-Buddy-Token':T||''},body:JSON.stringify({a:a,arg:arg,target:target||'laptop'})});return r.json()}
+const clean=s=>s.toLowerCase().replace(/^(hey |ok |okay )?buddy[, ]*/,'').replace(/[.?!]+$/,'').replace(/^please /,'').replace(/ please$/,'').trim();
+const tgt=m=>/phone/.test(m||'')?'phone':'laptop';
+const R=[
+ [/volume (?:to |at )?(\d{1,3})/,m=>['vol',m[1]]],
+ [/\b(volume|sound)\b.*\b(up|increase|raise)\b|\blouder\b|turn it up/,()=>['vol','up']],
+ [/\b(volume|sound)\b.*\b(down|decrease|lower)\b|\bquieter\b|turn it down/,()=>['vol','down']],
+ [/\b(un)?mute\b/,()=>['vol','mute']],
+ [/^stop( the)? (music|song)$/,()=>['stop_music','']],
+ [/^pause( the)?( music| song| video)?$/,()=>['media','pause']],
+ [/^(resume|continue)( the)?( music| song)?$|^play( the)?( music| song)$/,()=>['media','play']],
+ [/^(next|skip)( the)?( song| track)?$/,()=>['media','next']],
+ [/^(previous|last)( song| track)$/,()=>['media','previous']],
+ [/^play\s+(.+?)(?:\s+on\s+(?:my\s+|the\s+)?(phone|laptop|computer))?$/,m=>['play_music',m[1],tgt(m[2])]],
+ [/^(?:open|launch|start)\s+(.+?)(?:\s+on\s+(?:my\s+|the\s+)?(phone|laptop|computer))?$/,m=>['open_app',m[1].replace(/^(the|my)\s+/,''),tgt(m[2])]],
+ [/lock (the |my )?(laptop|screen|computer)/,()=>['lock','']],
+ [/screen ?shot/,()=>['screenshot','']],
+ [/brightness.*(up|increase)|\bbrighter\b/,()=>['brightness','up']],
+ [/brightness.*(down|decrease)|\bdimmer\b/,()=>['brightness','down']],
+ [/^(?:search|google)(?: for)?\s+(.+)/,m=>['search',m[1]]],
+ [/^(go )?(home|home screen)$/,()=>['phone_home','','phone']]
+];
+const _ask=ask;
+ask=async function(q){
+ const t=clean(q);let hit=null;
+ for(const [re,f] of R){const m=t.match(re);if(m){hit=f(m);break}}
+ if(!hit)return _ask(q);
+ if(busy)return;last=Date.now();setMood('think');
+ try{const r=await act(hit[0],hit[1],hit[2]);rest();speak(r.say||(r.ok?'Done.':'That failed.'))}
+ catch(e){rest();speak(DOWN)}
+};
+const ch=document.getElementById('chips');
+[['⏯','media','play-pause'],['🔉','vol','down'],['🔊','vol','up'],['Lock','lock','']].forEach(([l,a,g])=>{
+ const b=document.createElement('button');b.className='chip';b.textContent=l;
+ b.onclick=async()=>{try{const r=await act(a,g,'laptop');say(r.say||'')}catch(e){say('Laptop link is down.')}};ch.appendChild(b)});
+const dot=document.createElement('div');
+dot.style.cssText='position:fixed;top:calc(env(safe-area-inset-top) + 2vmin);right:3vmin;width:2.4vmin;height:2.4vmin;border-radius:50%;background:#555';
+document.body.appendChild(dot);
+async function ping(){try{const r=await fetch('/api/ping',{headers:{'X-Buddy-Token':T||''}});const j=await r.json();dot.style.background=j.phone?'#6be28b':'#e2b56b'}catch(e){dot.style.background='#e26b6b'}}
+ping();setInterval(ping,8000);
+})();
+</script>
+</body>
+</html>
